@@ -1,0 +1,6 @@
+quantstats
+pandas
+selenium
+webdriver_manager
+MetaTrader5
+streamlit
