@@ -67,14 +67,20 @@ class TradingService:
             print(self.portfolios)
 
     def calculate_returns_per_portfolio(self):
-        if self.portfolios is not None:
-            portfolio_returns = []
-            for sector, tickers in self.portfolios.iteritems():
-                daily_returns = self.data[(self.data["sector"] == sector) & (self.data["Papel"].isin(tickers))]["retorno"]
-                portfolio_returns.append(daily_returns.mean())
-
-            self.portfolio_returns = pd.DataFrame(portfolio_returns, columns=["retorno"], index=self.portfolios.index)
-        print(self.portfolio_returns)
+        if self.data is not None:
+            returns_data = []
+            for sector, tickers in self.portfolios.items():
+                returns = []
+                for ticker in tickers:
+                    return_value = self.stock_repo.get_return(ticker)
+                    if return_value is not None:
+                        returns.append(return_value)
+                if returns:
+                    average_return = sum(returns) / len(returns)
+                    returns_data.append({'sector': sector, 'average_return': average_return})
+            
+            self.portfolio_returns = pd.DataFrame(returns_data)
+            print(self.portfolio_returns)
 
     def calculate_model_returns(self):
         if self.portfolio_returns is not None:

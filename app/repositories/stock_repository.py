@@ -45,6 +45,22 @@ class StockRepository:
             print(f"Erro ao obter setor para {ticker}: {e}")
             return "N/A"
 
+    def get_return(self, ticker):
+        try:
+            url = f"{self.url}/detalhes.php?papel={ticker}"
+            self.driver.get(url)
+            min_52_weeks = "/html/body/div[1]/div[2]/table[1]/tbody/tr[3]/td[4]/span"
+            max_52_weeks = "/html/body/div[1]/div[2]/table[1]/tbody/tr[4]/td[4]/span"
+            min_price = self.driver.find_element("xpath", min_52_weeks).text.replace(",", ".")
+            max_price = self.driver.find_element("xpath", max_52_weeks).text.replace(",", ".")
+            if min_price and max_price:
+                return (float(max_price) - float(min_price)) / float(min_price) * 100
+            else:
+                return None
+        except Exception as e:
+            print(f"Erro ao obter retorno para {ticker}: {e}")
+            return None
+
     def load_data(self, file_path):
         try:
             selected_columns = ["Papel", "Cotação", "P/L", "P/VP", "EV/EBIT", "ROIC", "Liq.2meses"]
