@@ -24,8 +24,6 @@ class TradingController:
             print("CREATE PORTFOLIOS CONCLUIDO")
             self.trading_service.calculate_returns_per_portfolio()
             print("CALCULATE RETURNS PER PORTFOLIO CONCLUIDO")
-            self.trading_service.calculate_model_returns()
-            print("CALCULATE MODEL RETURNS CONCLUIDO")
             self.trading_service.calculate_ibovespa_returns()
             print("CALCULATE IBOVESPA CONCLUIDO")
             self.trading_service.analyze_results()

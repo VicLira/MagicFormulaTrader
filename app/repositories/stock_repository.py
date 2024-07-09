@@ -2,10 +2,9 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 
-from app.services.trading_service import TradingService
-
 import pandas as pd
 import os
+import yfinance as yf
 
 class StockRepository:
     def __init__(self):
@@ -81,4 +80,16 @@ class StockRepository:
             return data
         except ValueError as e:
             print(f"Erro ao converter ROIC para float: {e}")
+            return None
+
+    def get_ibovespa_returns(self):
+        try:
+            ibovespa = yf.Ticker("^BVSP")
+            hist = ibovespa.history(period="1y")
+            start_price = hist['Close'].iloc[0]
+            end_price = hist['Close'].iloc[-1]
+            total_return = (end_price - start_price) / start_price
+            return total_return
+        except yf.DownloadError as e:
+            print(f"Erro ao obter dados do Ibovespa: {e}")
             return None

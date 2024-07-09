@@ -76,27 +76,32 @@ class TradingService:
                     if return_value is not None:
                         returns.append(return_value)
                 if returns:
-                    average_return = sum(returns) / len(returns)
-                    returns_data.append({'sector': sector, 'average_return': average_return})
+                    average_return_1_year = sum(returns) / len(returns)
+                    returns_data.append({'sector': sector, 'average_return_1_year-magic-formula': average_return_1_year})
             
             self.portfolio_returns = pd.DataFrame(returns_data)
             print(self.portfolio_returns)
 
-    def calculate_model_returns(self):
-        if self.portfolio_returns is not None:
-            self.portfolio_returns["Magic Formula"] = (self.portfolio_returns["retorno"] + 1).cumprod() - 1
-        print(self.portfolio_returns)
-
     def calculate_ibovespa_returns(self):
-        if self.data is not None:
-            ibovespa_data = self.data[self.data["ticker"] == "IBOV"]
-            ibovespa_data = ibovespa_data.groupby("data")["retorno"].mean().to_frame()
-            ibovespa_data["IBOV"] = (ibovespa_data["retorno"] + 1).cumprod() - 1
-            self.ibovespa_returns = ibovespa_data[["IBOV"]]
-        print(self.data)
+        ibovespa_return = self.stock_repo.get_ibovespa_returns()
+        if ibovespa_return is not None:
+            print(f"Retorno médio do Ibovespa no último ano: {ibovespa_return * 100:.2f}%")
+            return ibovespa_return
+        else:
+            print("Falha ao obter retornos do Ibovespa.")
+            return None
 
     def analyze_results(self):
-        if self.portfolio_returns is not None and self.ibovespa_returns is not None:
-            self.comparison = self.portfolio_returns.join(self.ibovespa_returns)
-            print(self.comparison)
-        print(self.portfolio_returns)
+        ibovespa_return = self.calculate_ibovespa_returns()
+        if ibovespa_return is not None and self.portfolio_returns is not None:
+            try:
+                # Compara o retorno acumulado do Ibovespa com cada setor
+                for _, row in self.portfolio_returns.iterrows():
+                    sector = row['sector']
+                    sector_return = row['average_return_1_year-magic-formula']
+                    comparison = sector_return - (ibovespa_return * 100)
+                    print(f"Setor: {sector}")
+                    print(f"Retorno médio do setor no último ano: {sector_return:.2f}%")
+                    print(f"Comparação com o Ibovespa: {comparison:.2f}%")
+            except Exception as e:
+                print(f"Erro ao comparar retornos com benchmark: {e}")
